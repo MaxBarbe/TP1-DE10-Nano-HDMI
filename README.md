@@ -52,11 +52,13 @@ de l'absence d'image sur la carte n'a pas encore ete mesuree.
 3. Alimenter la DE10-Nano, allumer l'ecran, choisir son entree HDMI et brancher
    le cable HDMI ainsi que le port USB-Blaster II de la carte.
 4. Mettre SW0 a 0. Dans **Tools → Programmer**, choisir USB-Blaster II et JTAG,
-   charger **`output_files/affichage.sof`**, cocher **Program/Configure** et Start.
+   charger **`bitstream/affichage.sof`** (fourni compile), ou
+   **`output_files/affichage.sof`** apres recompilation, cocher **Program/Configure** et Start.
 5. Mettre SW0 a 1 et attendre la configuration. L'image filtree doit apparaitre.
 
-**Attention : `bitstream/affichage.sof` est l'ancien fichier de la mire rouge/verte.**
-Il n'a pas ete regenere avec ces sources. Utiliser la sortie d'une nouvelle compilation.
+**`bitstream/affichage.sof` a ete regenere le 19 octobre 2026 a 21:23 (Europe/Paris)**
+avec l'image et le filtre. Il remplace l'ancien bitstream de la mire rouge/verte.
+Son empreinte et les details de compilation sont dans `bitstream/build-info.txt`.
 La programmation JTAG est volatile : apres coupure d'alimentation, la configuration
 de demarrage de la carte revient. Ne pas confondre celle-ci avec le nouveau projet.
 
@@ -81,9 +83,20 @@ et la video avec SW0 deja a 1 et un NACK permanent.
 Le modele `altsyncram` est limite a cette ROM ; il ne remplace pas les bibliotheques
 Intel ni les analyses de synthese, placement/routage et timing de Quartus.
 
-Frequence : 25 MHz / (800 × 525) = **59,5238 Hz**. Cette revision reste a compiler
-avec Quartus et a tester physiquement. Les contraintes d'entrees/sorties externes
-ne sont pas completes ; aucune fermeture temporelle n'est annoncee.
+Compilation complete reussie sous **Quartus Prime Lite 17.1.0 Build 590**, le
+19 octobre 2026 a 21:23 (Europe/Paris) : **0 erreur, 8 avertissements**.
+Occupation : 543 ALM (1 %), 351 blocs RAM sur 553 (63 %), 1 bloc DSP.
+TimeQuest : marge setup minimale +5,925 ns, hold minimale +0,113 ns sur les
+chemins contraints, tous les modeles analyses confondus.
+Les avertissements portent sur le nombre de processeurs non fixe (4 occurrences),
+l'ajout de logique pour respecter le comportement des deux RAM de ligne,
+une option LogicLock indisponible dans Lite et l'absence de reglages explicites
+de courant/slew rate pour certaines sorties (valeurs par defaut utilisees).
+
+Frequence : 25 MHz / (800 × 525) = **59,5238 Hz**. Le fonctionnement sur carte
+reste a verifier. Les delais d'entrees/sorties externes ne sont pas contraints
+(2 entrees et 30 sorties dans TimeQuest) : les marges internes positives ne
+constituent pas une validation temporelle complete de l'interface HDMI/I2C.
 
 ## Documentation
 

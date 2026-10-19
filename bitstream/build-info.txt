@@ -1,0 +1,17 @@
+Project: affichage / top-level HDMI_image
+Device: Cyclone V 5CSEBA6U23I7
+Source commit: 856b99f3ca94d523dc040743d6175933375a2ec8
+Compiler: Quartus Prime Lite 17.1.0 Build 590 (Windows x86_64)
+Build completed: 2026-10-19 21:23:16 Europe/Paris
+Command: quartus_sh --flow compile affichage
+Result: full compilation successful, 0 errors, 8 warnings
+SOF size: 6690368 bytes
+SOF SHA256: 651f664d250087cf09d22185313622ecb18a883baea7b503124adfc47dde9b36
+ALMs: 543 / 41910
+RAM blocks: 351 / 553
+Memory bits: 2842560 / 5662720
+DSP blocks: 1 / 112
+Worst constrained setup slack across analyzed models: +5.925 ns
+Worst constrained hold slack across analyzed models: +0.113 ns
+External I/O delays remain unconstrained (2 inputs, 30 outputs).
+Physical HDMI output has not been tested on the board/monitor.

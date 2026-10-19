@@ -8,3 +8,4 @@ output_files/
 tests/work/
 *.crdownload
 Quartus-lite-*-windows.tar
+c5_pin_model_dump.txt

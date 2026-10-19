@@ -1,7 +1,11 @@
-# Ancien bitstream
+# Bitstream image filtree
 
-`affichage.sof` dans ce dossier correspond a l'ancienne mire rouge/verte.
-Il ne contient pas le filtre ni l'image ajoutes aux sources.
+`affichage.sof` contient l'image `brom24b.mif` et le filtre 3x3.
+Il a ete genere avec Quartus Prime Lite 17.1.0 Build 590 le 19 octobre 2026.
+La compilation complete se termine avec 0 erreur et 8 avertissements.
 
-Apres une nouvelle compilation complete, programmer `output_files/affichage.sof`.
-Ne pas utiliser ce fichier historique pour tester les modifications.
+Programmer ce fichier avec Quartus Programmer, USB-Blaster II, mode JTAG.
+Mettre SW0 a 0 pendant la programmation, puis a 1 pour demarrer.
+Apres une recompilation locale, utiliser `output_files/affichage.sof`.
+Voir `build-info.txt` pour la provenance et l'empreinte.
+Le fonctionnement sur la carte et l'ecran n'a pas encore ete verifie.
