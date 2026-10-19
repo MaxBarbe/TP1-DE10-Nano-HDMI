@@ -14,4 +14,5 @@ DSP blocks: 1 / 112
 Worst constrained setup slack across analyzed models: +5.925 ns
 Worst constrained hold slack across analyzed models: +0.113 ns
 External I/O delays remain unconstrained (2 inputs, 30 outputs).
-Physical HDMI output has not been tested on the board/monitor.
+Physical HDMI output: rabbit displayed on user board/monitor, confirmed by user
+on 2026-10-19. SW0 ON runs; OFF resets to black screen.

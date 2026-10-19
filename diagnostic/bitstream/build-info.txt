@@ -1,0 +1,7 @@
+Compiler: Quartus Prime Lite 17.1.0 Build 590
+Device: 5CSEBA6U23I7
+Project: led_check
+Build: 2026-10-19 21:49:22 Europe/Paris
+Result: 0 errors, 4 warnings
+SOF SHA256: 6ab72b7f76a9caf829c0d91c1ddb672181ab20db89fb1dfbccce9bb1a236a596
+Physical LED and SW0 behavior confirmed by user.
