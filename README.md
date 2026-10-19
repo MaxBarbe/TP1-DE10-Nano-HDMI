@@ -5,6 +5,37 @@ Une image de lapin (420 × 280, ROM RGB 24 bits) est traitée puis affichée sur
 au sein d’une trame 640 × 480. Projet testé sur la carte et l’écran de l’utilisateur
 le 19 octobre 2026 : SW0 ON affiche le lapin ; SW0 OFF donne un écran noir.
 
+## Résultats sur la carte
+
+**SW0 ON : image affichée. SW0 OFF : circuit en réinitialisation, écran noir.**
+Les photos suivantes montrent les deux états observés sur la même plateforme.
+
+| | SW0 ON / 1 | SW0 OFF / 0 |
+|---|---|---|
+| Affichage HDMI | <img src="resultat/IMG_0560.jpeg" alt="SW0 ON : le lapin apparaît sur l’écran HDMI" width="400"> | <img src="resultat/IMG_0563.jpeg" alt="SW0 OFF : écran noir" width="400"> |
+| Carte et interrupteurs | <img src="resultat/IMG_0561.jpeg" alt="DE10-Nano en fonctionnement, SW0 ON" width="400"> | <img src="resultat/IMG_0562.jpeg" alt="DE10-Nano en réinitialisation, SW0 OFF" width="400"> |
+
+### Consommation mesurée — exercice 3
+
+Mesure avec le **RUI DENG UM25C**, entre le port USB du PC et l’entrée **DC 5 V**
+de la carte. Moyennes de deux relevés par état :
+
+| SW0 ON | SW0 OFF | Écart ON − OFF | Débit nominal | Énergie par image en ON |
+|---:|---:|---:|---:|---:|
+| **3,149 W** | **3,120 W** | **29 mW** | **59,52 images/s** | **52,9 mJ/image** |
+
+`Epf = P_ON / fps = 3,148816 / 59,5238 ≈ 0,052900 J/image`.
+Cette valeur concerne l’ensemble de la plateforme et les pertes du câble en aval
+du testeur. L’écart ON/OFF inclut les changements d’activité vidéo et HDMI ;
+il ne représente pas uniquement la consommation du filtre.
+
+| Testeur — SW0 ON | Testeur — SW0 OFF |
+|---|---|
+| <img src="resultat/IMG_0572.jpeg" alt="UM25C avec SW0 ON : 5,004 V et 0,6301 A" width="400"> | <img src="resultat/IMG_0573.jpeg" alt="UM25C avec SW0 OFF : 5,005 V et 0,6238 A" width="400"> |
+
+Les relevés, les calculs et les limites de mesure figurent plus bas et dans
+[le dossier des résultats](resultat/README.md).
+
 ## Installation et démarrage depuis un clone
 
 Prérequis : **Quartus Prime Lite 17.1.0 Build 590**, support **Cyclone V** et pilote
