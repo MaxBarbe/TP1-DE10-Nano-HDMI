@@ -4,3 +4,7 @@ output_files/
 *.qws
 *.bak
 .DS_Store
+.tools/
+tests/work/
+*.crdownload
+Quartus-lite-*-windows.tar

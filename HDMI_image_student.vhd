@@ -3,89 +3,46 @@ use ieee.std_logic_1164.all;
 
 entity HDMI_image is
     port (
-        clk : in std_logic;     -- 50 MHz
+        clk : in std_logic;     -- FPGA_CLK1_50
         reset_n : in std_logic; -- SW0 : 0 = reset, 1 = marche
         R, G, B : out std_logic_vector(7 downto 0);
         clkout, HS, VS, EN : out std_logic;
         scl : out std_logic;
         sda : inout std_logic;
-        Init_config : out std_logic      -- LED0
+        Init_config : out std_logic
     );
 end entity;
 
 architecture rtl of HDMI_image is
-    signal clk25 : std_logic := '0';
+    signal startup : integer range 0 to 500000 := 0;
+    signal run_n : std_logic := '0';
     signal done : std_logic;
-    signal ready_meta, ready : std_logic := '0';
-    signal h : integer range 0 to 799 := 0;
-    signal v : integer range 0 to 524 := 0;
 begin
-    config : entity work.i2c_hdmi_config
-        port map (
-            clk         => clk,
-            reset_n     => reset_n,
-            i2c_scl     => scl,
-            i2c_sda     => sda,
-            hdmi_tx_int => '1', -- Reconfiguration manuelle avec SW0.
-            config_done => done
-        );
-    Init_config <= done;
-
-    -- Division par deux de l'horloge 50 MHz.
-    process(clk)
-    begin
-        if rising_edge(clk) then
-            clk25 <= not clk25;
-        end if;
-    end process;
-
-    -- Les donnees changent au front montant ; le HDMI les capture
-    -- un demi-cycle plus tard sur son horloge inversee.
-    clkout <= not clk25;
-
-    -- Synchronisation de la fin I2C et compteurs du balayage 800 x 525.
-    process(clk25, reset_n)
+    -- Reset automatique pendant 10 ms, meme si SW0 est deja sur 1.
+    process(clk, reset_n)
     begin
         if reset_n = '0' then
-            ready_meta <= '0';
-            ready <= '0';
-            h <= 0;
-            v <= 0;
-        elsif rising_edge(clk25) then
-            ready_meta <= done;
-            ready <= ready_meta;
-            if ready = '0' then
-                h <= 0;
-                v <= 0;
-            elsif h = 799 then
-                h <= 0;
-                if v = 524 then
-                    v <= 0;
-                else
-                    v <= v + 1;
-                end if;
+            startup <= 0;
+            run_n <= '0';
+        elsif rising_edge(clk) then
+            if startup < 500000 then
+                startup <= startup + 1;
+                run_n <= '0';
             else
-                h <= h + 1;
+                run_n <= '1';
             end if;
         end if;
     end process;
 
-    HS <= '0' when h >= 656 and h < 752 else '1';
-    VS <= '0' when v >= 490 and v < 492 else '1';
-    EN <= '1' when h < 640 and v < 480 and ready = '1' else '0';
+    config : entity work.i2c_hdmi_config
+        port map (clk => clk, reset_n => run_n,
+            i2c_scl => scl, i2c_sda => sda,
+            hdmi_tx_int => '1', config_done => done);
+    Init_config <= done;
 
-    -- Zone visible : 640 x 480, deux bandes sur fond de blanking noir.
-    process(h, v, ready)
-    begin
-        R <= (others => '0');
-        G <= (others => '0');
-        B <= (others => '0');
-        if ready = '1' and h < 640 and v < 480 then
-            if h < 320 then
-                R <= (others => '1');
-            else
-                G <= (others => '1');
-            end if;
-        end if;
-    end process;
+    -- Le balayage continue pendant les ecritures I2C, meme en cas de NACK.
+    video : entity work.affichage_image_filtre
+        port map (clk => clk, reset_n => run_n,
+            clk_out => clkout, en => EN, R => R, G => G, B => B,
+            hs => HS, vs => VS);
 end architecture;

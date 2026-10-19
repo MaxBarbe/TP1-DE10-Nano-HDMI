@@ -3,6 +3,10 @@ use ieee.std_logic_1164.all;
 use ieee.numeric_std.all;
 
 entity i2c_hdmi_config is
+    generic (
+        CLK_FREQ : positive := 50_000_000;
+        CTRL_CLK_FREQ : positive := 20_000
+    );
     port (
         clk         : in  std_logic;
         reset_n     : in  std_logic;
@@ -15,8 +19,6 @@ end entity;
 
 architecture rtl of i2c_hdmi_config is
 
-    constant CLK_FREQ        : integer := 50_000_000;
-    constant CTRL_CLK_FREQ   : integer := 20_000;
     constant LUT_SIZE        : integer := 30;            -- Dernier indice : 31 registres au total
 
     type lut_array is array (0 to LUT_SIZE) of std_logic_vector(15 downto 0);
@@ -41,6 +43,7 @@ architecture rtl of i2c_hdmi_config is
     signal i2c_ack         : std_logic;
     signal i2c_data        : std_logic_vector(23 downto 0);
     signal config_done_reg : std_logic := '0';
+    signal refresh_count   : integer range 0 to CTRL_CLK_FREQ - 1 := 0;
 
 begin
 
@@ -88,6 +91,7 @@ begin
             setup_st        <= 0;
             i2c_go          <= '0';
             config_done_reg <= '0';
+            refresh_count   <= 0;
         elsif rising_edge(i2c_ctrl_clk) then
             if lut_index <= LUT_SIZE then
                 case setup_st is
@@ -112,9 +116,16 @@ begin
                 end case;
             else
                 config_done_reg <= '1';
-                if hdmi_tx_int = '0' then
+                -- HPD bas peut reinitialiser des registres de l'ADV7513.
+                -- Rejouer la table apres un branchement tardif/debranchement,
+                -- meme sans connecter HDMI_TX_INT a l'entite superieure.
+                if hdmi_tx_int = '0' or refresh_count = CTRL_CLK_FREQ - 1 then
                     lut_index       <= 0;
+                    setup_st        <= 0;
+                    refresh_count   <= 0;
                     config_done_reg <= '0';
+                else
+                    refresh_count <= refresh_count + 1;
                 end if;
             end if;
         end if;
