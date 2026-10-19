@@ -2,7 +2,7 @@ library ieee;
 use ieee.std_logic_1164.all;
 
 -- Controleur attendu par i2c_hdmi_config.vhd.
--- L'horloge provient du diviseur conserve dans ce fichier.
+-- Horloge du controleur : 20 kHz ; horloge du bus SCL : 5 kHz.
 entity i2c_controller is
     port (
         clk, reset_n : in std_logic;
@@ -41,36 +41,55 @@ begin
         if reset_n = '0' then
             state <= idle;
             frame <= (others => '0');
-            byte_index <= 0; bit_index <= 7;
-            scl_reg <= '1'; sda_low <= '0';
-            failed <= '0'; i2c_stop <= '0';
+            byte_index <= 0;
+            bit_index <= 7;
+            scl_reg <= '1';
+            sda_low <= '0';
+            failed <= '0';
+            i2c_stop <= '0';
         elsif rising_edge(clk) then
             case state is
                 when idle =>
                     i2c_stop <= '0';
                     if i2c_start = '1' then
                         frame <= i2c_frame;
-                        failed <= '0'; byte_index <= 0; bit_index <= 7;
+                        failed <= '0';
+                        byte_index <= 0;
+                        bit_index <= 7;
                         state <= start_a;
                     end if;
                 when start_a =>
-                    scl_reg <= '1'; sda_low <= '0'; state <= start_b;
+                    scl_reg <= '1';
+                    sda_low <= '0';
+                    state <= start_b;
                 when start_b =>
-                    sda_low <= '1'; state <= start_c;
+                    sda_low <= '1';
+                    state <= start_c;
                 when start_c =>
-                    scl_reg <= '0'; state <= bit_low;
+                    scl_reg <= '0';
+                    state <= bit_low;
                 when bit_low =>
                     sda_low <= not frame(23 - byte_index * 8 - (7 - bit_index));
                     state <= bit_high;
-                when bit_high => scl_reg <= '1'; state <= bit_hold;
-                when bit_hold => state <= bit_end;
+                when bit_high =>
+                    scl_reg <= '1';
+                    state <= bit_hold;
+                when bit_hold =>
+                    state <= bit_end;
                 when bit_end =>
                     scl_reg <= '0';
-                    if bit_index = 0 then state <= ack_low;
-                    else bit_index <= bit_index - 1; state <= bit_low;
+                    if bit_index = 0 then
+                        state <= ack_low;
+                    else
+                        bit_index <= bit_index - 1;
+                        state <= bit_low;
                     end if;
-                when ack_low => sda_low <= '0'; state <= ack_high;
-                when ack_high => scl_reg <= '1'; state <= ack_sample;
+                when ack_low =>
+                    sda_low <= '0';
+                    state <= ack_high;
+                when ack_high =>
+                    scl_reg <= '1';
+                    state <= ack_sample;
                 when ack_sample =>
                     if i2c_sda /= '0' and i2c_sda /= 'L' then
                         failed <= '1';
@@ -78,17 +97,27 @@ begin
                     state <= ack_end;
                 when ack_end =>
                     scl_reg <= '0';
-                    if failed = '1' or byte_index = 2 then state <= stop_a;
-                    else byte_index <= byte_index + 1;
-                        bit_index <= 7; state <= bit_low;
+                    if failed = '1' or byte_index = 2 then
+                        state <= stop_a;
+                    else
+                        byte_index <= byte_index + 1;
+                        bit_index <= 7;
+                        state <= bit_low;
                     end if;
-                when stop_a => sda_low <= '1'; state <= stop_b;
-                when stop_b => scl_reg <= '1'; state <= stop_c;
-                when stop_c => sda_low <= '0'; state <= finished;
+                when stop_a =>
+                    sda_low <= '1';
+                    state <= stop_b;
+                when stop_b =>
+                    scl_reg <= '1';
+                    state <= stop_c;
+                when stop_c =>
+                    sda_low <= '0';
+                    state <= finished;
                 when finished =>
                     i2c_stop <= '1';
                     if i2c_start = '0' then
-                        i2c_stop <= '0'; state <= idle;
+                        i2c_stop <= '0';
+                        state <= idle;
                     end if;
             end case;
         end if;

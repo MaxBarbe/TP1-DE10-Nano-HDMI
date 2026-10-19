@@ -3,8 +3,8 @@ use ieee.std_logic_1164.all;
 
 entity HDMI_image is
     port (
-        clk : in std_logic;              -- 50 MHz
-        reset_n : in std_logic;          -- SW0 : 0 = reset, 1 = marche
+        clk : in std_logic;     -- 50 MHz
+        reset_n : in std_logic; -- SW0 : 0 = reset, 1 = marche
         R, G, B : out std_logic_vector(7 downto 0);
         clkout, HS, VS, EN : out std_logic;
         scl : out std_logic;
@@ -21,11 +21,17 @@ architecture rtl of HDMI_image is
     signal v : integer range 0 to 524 := 0;
 begin
     config : entity work.i2c_hdmi_config
-        port map (clk => clk, reset_n => reset_n,
-                  i2c_scl => scl, i2c_sda => sda, hdmi_tx_int => '1',
-                  config_done => done);
+        port map (
+            clk         => clk,
+            reset_n     => reset_n,
+            i2c_scl     => scl,
+            i2c_sda     => sda,
+            hdmi_tx_int => '1', -- Reconfiguration manuelle avec SW0.
+            config_done => done
+        );
     Init_config <= done;
 
+    -- Division par deux de l'horloge 50 MHz.
     process(clk)
     begin
         if rising_edge(clk) then
@@ -37,22 +43,29 @@ begin
     -- un demi-cycle plus tard sur son horloge inversee.
     clkout <= not clk25;
 
+    -- Synchronisation de la fin I2C et compteurs du balayage 800 x 525.
     process(clk25, reset_n)
     begin
         if reset_n = '0' then
-            ready_meta <= '0'; ready <= '0';
-            h <= 0; v <= 0;
+            ready_meta <= '0';
+            ready <= '0';
+            h <= 0;
+            v <= 0;
         elsif rising_edge(clk25) then
             ready_meta <= done;
             ready <= ready_meta;
             if ready = '0' then
-                h <= 0; v <= 0;
+                h <= 0;
+                v <= 0;
             elsif h = 799 then
                 h <= 0;
-                if v = 524 then v <= 0;
-                else v <= v + 1;
+                if v = 524 then
+                    v <= 0;
+                else
+                    v <= v + 1;
                 end if;
-            else h <= h + 1;
+            else
+                h <= h + 1;
             end if;
         end if;
     end process;
@@ -61,14 +74,17 @@ begin
     VS <= '0' when v >= 490 and v < 492 else '1';
     EN <= '1' when h < 640 and v < 480 and ready = '1' else '0';
 
+    -- Zone visible : 640 x 480, deux bandes sur fond de blanking noir.
     process(h, v, ready)
     begin
         R <= (others => '0');
         G <= (others => '0');
         B <= (others => '0');
         if ready = '1' and h < 640 and v < 480 then
-            if h < 320 then R <= (others => '1');
-            else G <= (others => '1');
+            if h < 320 then
+                R <= (others => '1');
+            else
+                G <= (others => '1');
             end if;
         end if;
     end process;
