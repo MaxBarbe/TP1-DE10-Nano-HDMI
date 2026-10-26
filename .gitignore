@@ -5,18 +5,18 @@ output_files/
 *.bak
 .DS_Store
 .tools/
-tests/work/
+**/tests/work/
 *.crdownload
 Quartus-lite-*-windows.tar
 c5_pin_model_dump.txt
 
 # Photos locales non utilisees dans les mesures publiees
-resultat/*.jpeg
-!resultat/IMG_0560.jpeg
-!resultat/IMG_0561.jpeg
-!resultat/IMG_0562.jpeg
-!resultat/IMG_0563.jpeg
-!resultat/IMG_0566.jpeg
-!resultat/IMG_0568.jpeg
-!resultat/IMG_0572.jpeg
-!resultat/IMG_0573.jpeg
+exo3/resultat/*.jpeg
+!exo3/resultat/IMG_0560.jpeg
+!exo3/resultat/IMG_0561.jpeg
+!exo3/resultat/IMG_0562.jpeg
+!exo3/resultat/IMG_0563.jpeg
+!exo3/resultat/IMG_0566.jpeg
+!exo3/resultat/IMG_0568.jpeg
+!exo3/resultat/IMG_0572.jpeg
+!exo3/resultat/IMG_0573.jpeg
