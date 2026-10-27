@@ -317,11 +317,6 @@ Le reset modifie plusieurs activités à la fois : balayage utile, mémoire, cal
 \end{minipage}
 \end{center}
 
-\subsection{Améliorations et travaux restant à réaliser}
-Une mesure plus solide intégrerait tension et courant pendant une même durée pour plusieurs répétitions, avec une température stabilisée et des périphériques identiques. Une variante filtre actif / filtre contourné, conservant le même balayage et le même HDMI, isolerait mieux l'effet du traitement que la comparaison avec le reset.
-
-Pour terminer la comparaison architecturale de l'énoncé, il faut compléter le parallélisme et utiliser des activités représentatives, puis mesurer le débit valide et la puissance. Pour l'exercice 2, l'estimation est de 428,86 mW ; restent le délai critique avec des E/S contraintes et une estimation fondée sur une activité représentative. L'analyse du multiplieur constitue un point de comparaison, mais son faible niveau de confiance interdit une comparaison énergétique définitive.
-
 \subsection{Conclusion}
 La chaîne réalisée stocke une image en ROM, construit un voisinage 3$\times$3, effectue un lissage RGB et génère une sortie HDMI. L'affichage sur carte est documenté. Les relevés conduisent à environ \textbf{3,149 W en fonctionnement} et \textbf{52,9 mJ par trame} au périmètre de l'alimentation, pour un débit nominal de 59,52 images/s.
 

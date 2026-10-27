@@ -40,3 +40,7 @@ Ancien projet Overleaf fourni par Maxime : [M2 TP1 Archi](https://www.overleaf.c
 ## Résultats retrouvés le 27 octobre
 
 Les sources et rapports originaux du filtre enregistré sont conservés dans [exo2/archive_quartus_2026-09-29](../exo2/archive_quartus_2026-09-29). Power Analyzer : 428,86 mW, confiance Low, sans activité de simulation. Les 72 entrées et 8 sorties ne sont pas contraintes : le délai critique et le débit à 100 MHz ne sont pas validés. Le rapport distingue cette version de la version combinatoire du dépôt.
+
+## Résultats retrouvés le 27 octobre
+
+Les sources et rapports originaux du filtre enregistré sont conservés dans [exo2/archive_quartus_2026-09-29](../exo2/archive_quartus_2026-09-29). Power Analyzer : 428,86 mW, confiance Low, sans activité de simulation. Les 72 entrées et 8 sorties ne sont pas contraintes : le délai critique et le débit à 100 MHz ne sont pas validés. Le rapport distingue cette version de la version combinatoire du dépôt.
