@@ -1,0 +1,83 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage{lmodern,geometry,amsmath,booktabs,tabularx,xcolor,fancyhdr,listings,hyperref}
+\geometry{margin=2.2cm}
+\definecolor{bleu}{HTML}{173B57}
+\hypersetup{colorlinks=true,urlcolor=bleu,linkcolor=bleu}
+\pagestyle{fancy}\fancyhf{}\fancyhead[L]{SMUEL302 -- Architecture multicores}\fancyhead[R]{Governor conservative}\fancyfoot[C]{\thepage}
+\setlength{\headheight}{14pt}
+\setlength{\parindent}{0pt}\setlength{\parskip}{6pt}
+\lstset{basicstyle=\ttfamily\footnotesize,breaklines=true,frame=single,columns=fullflexible}
+\title{\color{bleu}\textbf{Description du governor conservative}\\[5pt]\large Gestion de la fréquence et compromis énergie / performance}
+\author{Maxime Barbe\\Université Côte d'Azur -- Master 2 ESTel}
+\date{26 octobre 2026}
+\begin{document}
+\maketitle
+\section{Rôle dans le DVFS}
+Le support du TP2 présente le governor comme la politique logicielle qui choisit la fréquence selon la charge et les limites autorisées (diapositives 4 à 10). Dans Linux, CPUFreq sépare cette décision du pilote qui commande le matériel. Sur notre relevé Raspberry Pi 4, ce pilote est \texttt{cpufreq-dt}. Le governor ne fixe donc pas directement une tension arbitraire : le matériel et son pilote appliquent les points de fonctionnement disponibles.
+
+Le cours relie puissance et énergie par $E=\int_0^T P(t)\,dt$ et rappelle que la puissance de commutation dépend de la tension au carré et de la fréquence. Baisser la fréquence peut réduire la puissance, mais allonger l'exécution. Le critère pertinent reste l'énergie d'une tâche terminée et le respect de son échéance, pas seulement les watts instantanés.
+
+\section{Principe et paramètres}
+\texttt{conservative} adapte la fréquence progressivement à partir de la charge CPU. Au-dessus du seuil haut, il demande une hausse ; sous le seuil bas, une baisse ; entre les deux, il conserve la fréquence. Cette zone évite des changements permanents autour d'un seuil unique. Les décisions restent limitées par \texttt{scaling\_min\_freq}, \texttt{scaling\_max\_freq} et les fréquences réellement disponibles.
+
+\begin{center}
+\begin{tabularx}{\linewidth}{@{}l l X@{}}
+\toprule
+Paramètre & Relevé & Interprétation\\
+\midrule
+\texttt{up\_threshold} & 80 & Hausse lorsque la charge dépasse 80\,\%.\\
+\texttt{down\_threshold} & 20 & Baisse lorsque la charge passe sous 20\,\%.\\
+\texttt{freq\_step} & 5 & Pas demandé : 5\,\% de la fréquence maximale autorisée.\\
+\texttt{sampling\_rate} & Non relevé & Période d'évaluation de la charge, en microsecondes.\\
+\texttt{sampling\_down\_factor} & Non relevé & Ralentit la cadence des baisses de fréquence.\\
+\bottomrule
+\end{tabularx}
+\end{center}
+
+La sélection s'effectue sur les points autorisés : le pas arithmétique n'est pas nécessairement le saut observé. Par exemple, avec une limite de 1\,800 MHz, 5\,\% représente 90 MHz ; le pilote doit choisir un niveau disponible. La durée réelle d'une montée complète dépend aussi de la période d'échantillonnage, des limites et de la charge.
+
+\section{Observations disponibles sur notre plateforme}
+Le relevé de terminal déjà fourni pour le TP2 identifie un Raspberry Pi 4 Model B Rev 1.5, quatre c\oe{}urs, avec des fréquences recensées de 600 à 1\,800 MHz. Il montre d'abord \texttt{ondemand}, puis \texttt{conservative} après modification. Une lecture de \texttt{scaling\_cur\_freq} donne alors 600\,000 kHz. Les valeurs 80, 20 et 5 du tableau ont été effectivement lues ; les deux autres paramètres restent à relever.
+
+Ce relevé ponctuel confirme la sélection du governor, mais ne démontre ni la dynamique des paliers ni un gain énergétique. Les statistiques \texttt{time\_in\_state} accumulées avant et après plusieurs réglages ne peuvent pas être attribuées au seul governor conservative.
+
+\section{Lecture et sélection sous Linux}
+Les commandes ci-dessous sont à exécuter sur le Raspberry Pi, pas sur le Mac. Vérifier d'abord les governors disponibles et les c\oe{}urs associés à la politique. La sélection est temporaire et doit être effectuée en conservant les limites de sécurité du système.
+\begin{lstlisting}
+cd /sys/devices/system/cpu/cpu0/cpufreq
+cat scaling_available_governors
+cat scaling_governor
+cat scaling_driver
+cat related_cpus
+cat scaling_min_freq scaling_max_freq
+sudo sh -c 'echo conservative > scaling_governor'
+cat scaling_governor
+\end{lstlisting}
+Les paramètres peuvent se trouver dans le dossier global \path{/sys/devices/system/cpu/cpufreq/conservative/}, comme dans notre relevé, ou sous un dossier de politique selon le noyau. Le nom correct de la liste est \texttt{scaling\_available\_governors}, au pluriel.
+
+\section{Comparaison et protocole d'évaluation}
+Le support du TP oppose la montée progressive de conservative à la montée rapide de \texttt{ondemand}, et aux choix extrêmes de \texttt{performance} et \texttt{powersave}. Une progression douce peut convenir à une charge modérée et régulière. Pour une pointe brève ou une échéance serrée, elle peut retarder le traitement. Un retour lent vers les basses fréquences peut aussi prolonger une consommation élevée.
+
+Pour l'application de traitement d'image du TP2, une comparaison utile consiste à exécuter le même lot d'images avec les mêmes versions logicielles, périphériques et conditions thermiques. Pour chaque réglage, relever simultanément la fréquence, la puissance à l'alimentation, la durée murale et le nombre d'images terminées. Répéter les essais et calculer :
+\[
+ E_{\mathrm{lot}}=\int_0^T P(t)\,dt,\qquad
+ E_{\mathrm{image}}=\frac{E_{\mathrm{lot}}}{N},\qquad
+ \mathrm{débit}=\frac{N}{T}.
+\]
+Si la puissance est suffisamment stable, $E_{\mathrm{lot}}\simeq\overline P T$ est une approximation. Comparer les résultats uniquement pour une qualité d'image identique et un débit compatible avec l'objectif. Conserver les protections thermiques et vérifier les limites de fréquence réellement appliquées.
+
+\section{Conclusion}
+Conservative propose une adaptation progressive et paramétrable. Nos relevés vérifient sa disponibilité, sa sélection et trois réglages. Ils ne permettent pas encore de conclure qu'il minimise l'énergie sur l'application du TP : cette conclusion exige les mesures conjointes de puissance et de temps décrites ci-dessus.
+
+\small
+\section*{Sources}
+\begin{enumerate}
+\item C. Belleudy, \emph{TP2 : Architectures multicores \& consommation}, diapositives 4--10 et 33--34, support Moodle SMUEL302.
+\item C. Belleudy, \emph{Estimation et Optimisation de la consommation dans les architectures multicores}, diapositives 8--9, 20 et 88--94, fichier Moodle \texttt{M2\_LP\_P1\_2025.pdf}.
+\item Relevé de terminal Raspberry Pi transmis dans le projet TP2, exploité dans le chat \emph{Clarifier les étapes du TP2}, 21 octobre 2026.
+\item Linux Kernel, \href{https://www.kernel.org/doc/html/latest/admin-guide/pm/cpufreq.html}{CPU Performance Scaling}, et \href{https://github.com/torvalds/linux/blob/master/drivers/cpufreq/cpufreq_conservative.c}{source du governor conservative}, consultés le 26 octobre 2026.
+\end{enumerate}
+\end{document}
