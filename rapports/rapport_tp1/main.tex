@@ -196,6 +196,23 @@ La somme des trois postes de puissance est bien $1{,}24+412{,}26+15{,}36=428{,}8
 
 Pour une campagne ultérieure à un résultat par cycle validé, l'énergie se calculerait avec $E_{\mathrm{résultat}}=P/f$ et $E_N=NP/f$. Ces expressions exigent un débit établi et une puissance correspondant à son activité ; les rapports retrouvés ne suffisent pas à établir ces deux conditions.
 
+\newpage
+\subsection{Implémentation du filtre sous Quartus}
+La figure~\ref{fig:quartus-filtre-source} présente les neuf entrées du filtre, le calcul de la somme pondérée et le registre de sortie commandé par \texttt{clk}.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{images/quartus_filtre_source.png}
+\caption{Description VHDL du filtre à sortie enregistrée dans Quartus Prime Lite 17.1.}
+\label{fig:quartus-filtre-source}
+\end{figure}
+
+La figure~\ref{fig:quartus-filtre-timequest} montre le panneau \emph{Datasheet Report -- Setup Times} de TimeQuest. Ces temps de setup aux ports ne constituent pas une mesure du délai critique complet du filtre ; leur interprétation dépend des contraintes d'interface.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=\linewidth]{images/quartus_filtre_timequest.png}
+\caption{Consultation des temps de setup aux ports du projet TP1\_EXO2 dans TimeQuest.}
+\label{fig:quartus-filtre-timequest}
+\end{figure}
 \endgroup
 
 \newpage
