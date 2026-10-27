@@ -1,0 +1,12 @@
+# Variantes retrouvées dans le cache Quartus
+
+Fichiers originaux récupérés depuis `/Users/maxime/Documents/M2_TP1_Archi/TP1/db` le 27 octobre 2026. Ils attestent des configurations générées ; ils ne constituent pas des rapports de synthèse, de puissance ou de validation de latence pour chaque variante. Les rapports output_files conservés correspondent seulement à la dernière compilation.
+
+- `add_sub_0ng.tdf` : `--lpm_add_sub CARRY_CHAIN="MANUAL" CARRY_CHAIN_LENGTH=48 DEVICE_FAMILY="Cyclone V" LPM_DIRECTION="ADD" LPM_PIPELINE=1 LPM_REPRESENTATION="SIGNED" LPM_WIDTH=32 clock dataa datab result`
+- `add_sub_1ng.tdf` : `--lpm_add_sub CARRY_CHAIN="MANUAL" CARRY_CHAIN_LENGTH=48 DEVICE_FAMILY="Cyclone V" LPM_DIRECTION="ADD" LPM_PIPELINE=2 LPM_REPRESENTATION="SIGNED" LPM_WIDTH=32 clock dataa datab result`
+- `add_sub_2ng.tdf` : `--lpm_add_sub CARRY_CHAIN="MANUAL" CARRY_CHAIN_LENGTH=48 DEVICE_FAMILY="Cyclone V" LPM_DIRECTION="ADD" LPM_PIPELINE=4 LPM_REPRESENTATION="SIGNED" LPM_WIDTH=32 clock dataa datab result`
+- `altfp_add_sub_8ri.tdf` : `--altfp_add_sub CBX_DECLARE_ALL_CONNECTED_PORTS="OFF" DEVICE_FAMILY="Cyclone V" PIPELINE=14 ROUNDING="TO_NEAREST" WIDTH_EXP=8 WIDTH_MAN=23 clock dataa datab result CARRY_CHAIN="MANUAL" CARRY_CHAIN_LENGTH=48`
+- `mult_njo.v` : `//lpm_mult CBX_DECLARE_ALL_CONNECTED_PORTS="OFF" DEVICE_FAMILY="Cyclone V" DSP_BLOCK_BALANCING="Auto" LPM_PIPELINE=1 LPM_REPRESENTATION="SIGNED" LPM_WIDTHA=32 LPM_WIDTHB=32 LPM_WIDTHP=64 LPM_WIDTHS=32 clock dataa datab result CARRY_CHAIN="MANUAL" CARRY_CHAIN_LENGTH=48`
+- `mult_ojo.v` : `//lpm_mult CBX_DECLARE_ALL_CONNECTED_PORTS="OFF" DEVICE_FAMILY="Cyclone V" DSP_BLOCK_BALANCING="Auto" LPM_PIPELINE=2 LPM_REPRESENTATION="SIGNED" LPM_WIDTHA=32 LPM_WIDTHB=32 LPM_WIDTHP=64 LPM_WIDTHS=32 clock dataa datab result CARRY_CHAIN="MANUAL" CARRY_CHAIN_LENGTH=48`
+- `mult_qjo.v` : `//lpm_mult CBX_DECLARE_ALL_CONNECTED_PORTS="OFF" DEVICE_FAMILY="Cyclone V" DSP_BLOCK_BALANCING="Auto" LPM_PIPELINE=4 LPM_REPRESENTATION="SIGNED" LPM_WIDTHA=32 LPM_WIDTHB=32 LPM_WIDTHP=64 LPM_WIDTHS=32 clock dataa datab result CARRY_CHAIN="MANUAL" CARRY_CHAIN_LENGTH=48`
+- `mult_7pp.v` : `//lpm_mult CBX_DECLARE_ALL_CONNECTED_PORTS="OFF" DEVICE_FAMILY="Cyclone V" DSP_BLOCK_BALANCING="Auto" LPM_PIPELINE=1 LPM_REPRESENTATION="SIGNED" LPM_WIDTHA=32 LPM_WIDTHB=32 LPM_WIDTHP=64 LPM_WIDTHS=32 USE_EAB="OFF" clock dataa datab result CARRY_CHAIN="MANUAL" CARRY_CHAIN_LENGTH=48`

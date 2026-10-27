@@ -32,7 +32,7 @@
 \textbf{Plateforme :} Terasic DE10-Nano, Cyclone V 5CSEBA6U23I7.\\
 \textbf{Outils :} Quartus Prime Lite 17.1, Power Analyzer, description VHDL/Verilog.
 
-\small\textbf{État du compte rendu.} L'exercice 3 dispose d'un affichage observé et de quatre relevés d'alimentation. Les exercices 1 et 2 disposent aussi de rapports Quartus archivés. Les comparaisons de variantes de l'exercice 1 et la validation temporelle complète du filtre restent à compléter. Aucune valeur expérimentale n'est extrapolée pour combler ces manques.
+\small\textbf{État du compte rendu.} L'exercice 3 dispose d'un affichage observé et de quatre relevés d'alimentation. Les exercices 1 et 2 disposent aussi de rapports Quartus archivés. Les résultats comparatifs des variantes de l'exercice 1 et la validation temporelle complète du filtre restent à compléter. Aucune valeur expérimentale n'est extrapolée pour combler ces manques.
 \end{titlepage}\hypersetup{pageanchor=true}
 
 \section{Objectif et méthode}
@@ -59,7 +59,7 @@ Le Power Analyzer estime une puissance du composant selon son modèle et l'activ
 \toprule
 Partie & Éléments exploitables\\
 \midrule
-Exercice 1 & Additionneur enregistré, testbench à 100 MHz, multiplieur LPM\_MULT et ancien rapport Power Analyzer du 29 septembre.\\
+Exercice 1 & Additionneur enregistré, IP générées pour additions et multiplications pipelinées, addition flottante, testbench à 100 MHz et ancien rapport Power Analyzer du 29 septembre.\\
 Exercice 2 & Filtre combinatoire et version à sortie enregistrée ; rapports Quartus du 29 septembre retrouvés dans le volume Docker ; intégration dans l'exercice 3.\\
 Exercice 3 & Sources complètes, provenance de compilation, photos d'affichage, quatre relevés de tension/courant et CSV.\\
 \bottomrule
@@ -81,28 +81,24 @@ always @(posedge clk)
 Le résultat est ramené à 32 bits : la retenue finale est perdue. Ainsi, \texttt{FFFFFFFF + 1} produit zéro modulo $2^{32}$. Le testbench prévoit une période de 10 ns, soit 100 MHz, et quelques cas simples. Il s'agit de stimuli fonctionnels courts, insuffisants pour représenter seuls une activité arithmétique générale.
 
 \subsection{Comparaisons demandées et interprétation}
-Le pipeline raccourcit le chemin combinatoire entre registres mais ajoute des bascules et de l'activité d'horloge. À fréquence identique, il n'augmente pas nécessairement le débit si l'architecture accepte déjà un opérande par cycle. L'intérêt doit être évalué avec une fréquence plus élevée admissible et avec les coûts de remplissage.
-
-Pour $q$ voies indépendantes, une fréquence $f$ et un intervalle d'initiation $II$, le débit théorique en régime établi est :
-\[
- R_{\mathrm{op}}=\frac{qf}{II}.
-\]
-La latence de $L$ cycles vaut $L/f$ ; elle ne doit pas être confondue avec l'intervalle entre résultats. Le parallélisme augmente les ressources et l'activité ; son intérêt énergétique dépend de l'augmentation effective du débit et des échanges de données.
+Le pipeline raccourcit le chemin combinatoire, mais ajoute des registres. Pour $q$ voies, une fréquence $f$ et un intervalle d'initiation $II$, le débit théorique vaut $qf/II$ ; une latence de $L$ cycles vaut $L/f$. L'énergie par résultat dépend du débit réellement atteint et de l'activité.
 
 \begin{center}
-\small
+\footnotesize
 \begin{tabularx}{\linewidth}{@{}l X@{}}
 \toprule
 Comparaison demandée & État des données disponibles\\
 \midrule
-Addition entière, latence 1 & Source et testbench disponibles ; puissance non retrouvée.\\
-Addition entière, pipeline 2 et 4 & Résultats de synthèse et d'activité non retrouvés.\\
-Addition flottante & Variantes et rapports non retrouvés.\\
+Addition entière, latence 1 & Source, testbench et IP pipeline 1 retrouvés ; puissance associée non retrouvée.\\
+Addition entière, pipeline 2 et 4 & IP générées pipeline 2 et 4 retrouvées ; résultats chiffrés associés non retrouvés.\\
+Addition flottante & IP retrouvée : exposant 8 bits, mantisse 23 bits, pipeline 14 ; rapport associé non retrouvé.\\
 Voies parallèles & Comparaison chiffrée non disponible.\\
-Multiplication DSP / éléments logiques & Un résultat DSP ancien retrouvé ; variante logique absente.\\
+Multiplication DSP / éléments logiques & IP pipeline 1, 2 et 4 retrouvées ; un seul résultat DSP ancien conservé, sans comparaison logique validée.\\
 \bottomrule
 \end{tabularx}
 \end{center}
+
+\textbf{Correction après examen du cache Quartus.} Le dossier original \path{M2_TP1_Archi/TP1/db} contient les IP générées \texttt{add\_sub\_0ng/1ng/2ng.tdf} (addition signée 32 bits, pipeline 1/2/4), \texttt{altfp\_add\_sub\_8ri.tdf} (flottant, pipeline 14) et \texttt{mult\_njo/ojo/qjo.v} (multiplication signée 32$\times$32 vers 64 bits, pipeline 1/2/4). Ces fichiers prouvent les configurations générées, mais ne donnent pas les consommations finales de chaque variante. Ils sont préservés sous \path{exo1/archive_ip_generees/}.
 
 \subsection{Résultat ancien du multiplieur}
 Le projet conservé utilise un \texttt{LPM\_MULT} signé, entrées 32 bits et produit 64 bits. Le schéma porte un paramètre de pipeline de 1 ; cependant, le rapport Fitter correspondant indique zéro registre final. Il faut donc vérifier la réalisation obtenue avant d'affirmer la latence effective de cette compilation.
@@ -317,7 +313,7 @@ Le reset modifie plusieurs activités à la fois : balayage utile, mémoire, cal
 \subsection{Améliorations et travaux restant à réaliser}
 Une mesure plus solide intégrerait tension et courant pendant une même durée pour plusieurs répétitions, avec une température stabilisée et des périphériques identiques. Une variante filtre actif / filtre contourné, conservant le même balayage et le même HDMI, isolerait mieux l'effet du traitement que la comparaison avec le reset.
 
-Pour terminer la comparaison architecturale de l'énoncé, il faut compléter les variantes d'addition, de pipeline et de parallélisme, produire des activités représentatives, puis mesurer le débit valide et la puissance. Pour l'exercice 2, l'estimation de 428,86 mW est retrouvée ; restent le délai critique avec des E/S contraintes et une estimation fondée sur une activité représentative. L'ancien rapport du multiplieur constitue un point de départ, mais son faible niveau de confiance interdit une comparaison énergétique définitive.
+Pour terminer la comparaison architecturale de l'énoncé, il faut retrouver ou refaire les résultats chiffrés des IP d'addition et de multiplication retrouvées, compléter le parallélisme et produire des activités représentatives, puis mesurer le débit valide et la puissance. Pour l'exercice 2, l'estimation de 428,86 mW est retrouvée ; restent le délai critique avec des E/S contraintes et une estimation fondée sur une activité représentative. L'ancien rapport du multiplieur constitue un point de départ, mais son faible niveau de confiance interdit une comparaison énergétique définitive.
 
 \subsection{Conclusion}
 La chaîne réalisée stocke une image en ROM, construit un voisinage 3$\times$3, effectue un lissage RGB et génère une sortie HDMI. L'affichage sur carte est documenté. Les relevés conduisent à environ \textbf{3,149 W en fonctionnement} et \textbf{52,9 mJ par trame} au périmètre de l'alimentation, pour un débit nominal de 59,52 images/s.
