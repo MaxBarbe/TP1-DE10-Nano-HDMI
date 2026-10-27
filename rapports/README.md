@@ -19,4 +19,10 @@ L’article étudie le DVFS sur matériel réel, notamment un Raspberry Pi 4B, e
 
 ## État des dépôts
 
-À cette étape : fichiers préparés localement. Le dépôt Moodle et l’import Overleaf doivent être vérifiés séparément ; la présence dans Git ne prouve pas leur réalisation.
+État vérifié le 27 octobre 2026 :
+
+- [Rapport TP1 importé sur Overleaf](https://www.overleaf.com/project/6ae0dd21f86e28565cf50b91), compilation sans erreur.
+- Article scientifique enregistré sur Moodle, statut **Brouillon (non remis)**.
+- Description du governor enregistrée sur Moodle, statut **Brouillon (non remis)**.
+- Les deux dépôts restent volontairement en brouillon à la demande de Maxime.
+- Le rapport TP1 n’a pas été remis sur Moodle. Il reste à compléter les comparaisons manquantes des exercices 1 et 2 avant la version finale.
