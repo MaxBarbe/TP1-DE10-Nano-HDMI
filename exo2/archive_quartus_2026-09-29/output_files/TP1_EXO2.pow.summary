@@ -1,0 +1,12 @@
+Power Analyzer Status : Successful - Tue Sep 29 13:03:07 2026
+Quartus Prime Version : 17.1.0 Build 590 10/25/2017 SJ Lite Edition
+Revision Name : TP1_EXO2
+Top-level Entity Name : TP1_EXO2
+Family : Cyclone V
+Device : 5CSEBA6U23I7
+Power Models : Final
+Total Thermal Power Dissipation : 428.86 mW
+Core Dynamic Thermal Power Dissipation : 1.24 mW
+Core Static Thermal Power Dissipation : 412.26 mW
+I/O Thermal Power Dissipation : 15.36 mW
+Power Estimation Confidence : Low: user provided insufficient toggle rate data
