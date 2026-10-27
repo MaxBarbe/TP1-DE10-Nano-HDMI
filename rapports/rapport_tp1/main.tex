@@ -7,7 +7,7 @@
 \definecolor{bleu}{HTML}{173B57}
 \hypersetup{colorlinks=true,urlcolor=bleu,linkcolor=bleu}
 \pagestyle{fancy}\fancyhf{}\fancyhead[L]{TP1 -- Étude de la consommation d'un core}\fancyhead[R]{M2 ESTel}\fancyfoot[C]{\thepage}
-\setlength{\headheight}{14pt}
+\setlength{\headheight}{15pt}
 \setlength{\parindent}{0pt}\setlength{\parskip}{6pt}
 \renewcommand{\arraystretch}{1.2}
 \lstset{basicstyle=\ttfamily\footnotesize,breaklines=true,frame=single,columns=fullflexible}
@@ -22,7 +22,7 @@
 \vspace{0.9cm}
 {\Large Maxime Barbe\par}
 \vspace{0.3cm}
-26 octobre 2026
+27 octobre 2026
 
 \vspace{1.2cm}
 \begin{center}
@@ -32,7 +32,7 @@
 \textbf{Plateforme :} Terasic DE10-Nano, Cyclone V 5CSEBA6U23I7.\\
 \textbf{Outils :} Quartus Prime Lite 17.1, Power Analyzer, description VHDL/Verilog.
 
-\small\textbf{État du compte rendu.} L'exercice 3 dispose d'un affichage observé et de quatre relevés d'alimentation. Les exercices 1 et 2 sont documentés à partir des sources disponibles ; leurs comparaisons de puissance et certains temps de réponse restent à compléter. Aucune valeur expérimentale n'est extrapolée pour combler ces manques.
+\small\textbf{État du compte rendu.} L'exercice 3 dispose d'un affichage observé et de quatre relevés d'alimentation. Les exercices 1 et 2 disposent aussi de rapports Quartus archivés. Les comparaisons de variantes de l'exercice 1 et la validation temporelle complète du filtre restent à compléter. Aucune valeur expérimentale n'est extrapolée pour combler ces manques.
 \end{titlepage}\hypersetup{pageanchor=true}
 
 \section{Objectif et méthode}
@@ -60,7 +60,7 @@ Le Power Analyzer estime une puissance du composant selon son modèle et l'activ
 Partie & Éléments exploitables\\
 \midrule
 Exercice 1 & Additionneur enregistré, testbench à 100 MHz, multiplieur LPM\_MULT et ancien rapport Power Analyzer du 29 septembre.\\
-Exercice 2 & Filtre 3$\times$3 combinatoire à neuf entrées 8 bits ; intégration dans l'exercice 3.\\
+Exercice 2 & Filtre combinatoire et version à sortie enregistrée ; rapports Quartus du 29 septembre retrouvés dans le volume Docker ; intégration dans l'exercice 3.\\
 Exercice 3 & Sources complètes, provenance de compilation, photos d'affichage, quatre relevés de tension/courant et CSV.\\
 \bottomrule
 \end{tabularx}
@@ -124,7 +124,7 @@ Horloge annoncée dans le rapport & 100 MHz\\
 \textbf{Limite :} Quartus classe la confiance \emph{Low} et n'utilise aucune activité issue de simulation. La fréquence annoncée ne prouve pas un débit utile d'une multiplication par cycle. On ne déduit donc pas d'énergie par opération fiable de ce seul rapport, ni de conclusion DSP contre logique.
 
 \newpage
-\endgroup\section{Exercice 2 -- Architecture du filtre vidéo}
+\endgroup\begingroup\small\section{Exercice 2 -- Architecture du filtre vidéo}
 \subsection{Noyau et dimensionnement}
 Le filtre proposé par l'énoncé [1] utilise le masque :
 \[
@@ -140,7 +140,7 @@ Pour chaque composante, la sortie est la somme pondérée des neuf pixels, divis
 Une somme non signée de 12 bits suffit. Le fichier \texttt{filtre\_video.vhd} étend les entrées à 12 bits avant addition ; la multiplication centrale par 2 est un décalage. La division entière par 10 tronque la partie fractionnaire et la sortie reste dans $[0,255]$.
 
 \subsection{IP isolée et chaîne complète}
-L'IP isolée est combinatoire : neuf pixels 8 bits entrent en parallèle et une valeur filtrée en sort. Elle ne fournit ni voisinage mémoire ni synchronisation vidéo. Son temps de propagation doit être relevé après synthèse et placement-routage ; aucune valeur mesurée de ce délai n'a été retrouvée.
+La version \texttt{filtre\_video.vhd} du dépôt est combinatoire : neuf pixels 8 bits entrent en parallèle et une valeur filtrée en sort. Elle ne fournit ni voisinage mémoire ni synchronisation vidéo. Son temps de propagation doit être relevé après synthèse et placement-routage ; aucune valeur mesurée de ce délai n'a été retrouvée.
 
 L'intégration de l'exercice 3 reconstruit le voisinage par deux buffers de ligne de 420 pixels et des registres horizontaux. Pour du RGB 24 bits, les buffers représentent logiquement :
 \[
@@ -162,7 +162,38 @@ La chaîne intégrée traite jusqu'à un pixel par cycle de l'horloge vidéo dan
 
 Le temps nécessaire pour disposer du premier voisinage comprend au moins deux lignes et deux colonnes. Dans la trame utilisée, les lignes comportent 800 périodes, y compris les zones de suppression vidéo ; la construction du voisinage s'étale donc sur le calendrier vidéo, pas seulement sur les 420 pixels utiles d'une ligne.
 
-Le délai critique de l'IP et sa puissance isolée ne sont pas disponibles. La valeur d'énergie mesurée dans la section suivante concerne toute la plateforme. Pour caractériser l'IP seule en fonction du débit, il reste à simuler des images représentatives, importer leur activité dans Power Analyzer et comparer plusieurs fréquences respectant le timing.
+La puissance archivée ci-dessous concerne une autre version, à sortie enregistrée. La mesure de la section suivante concerne toute la plateforme. Une comparaison énergétique selon le débit exige encore une activité représentative et des contraintes temporelles complètes.
+
+\newpage
+\subsection{Résultats Quartus retrouvés : sortie enregistrée}
+Le projet \texttt{TP1\_EXO2}, conservé dans un ancien volume Docker Quartus, a été retrouvé le 27 octobre. Ses rapports datent du \textbf{29 septembre 2026}. Le fichier \texttt{TP1\_EXO2.vhd} calcule la même somme pondérée, puis enregistre \texttt{somme/10} sur le front montant de \texttt{clk}. Il traite une composante 8 bits ; les neuf entrées totalisent 72 bits. Cette réalisation possède donc une sortie enregistrée, contrairement au fichier combinatoire du dépôt.
+
+\begin{center}
+\begin{tabular}{@{}lr@{}}
+\toprule
+Power Analyzer / Fitter archivés & Valeur\\
+\midrule
+Puissance thermique totale estimée & \textbf{428,86 mW}\\
+Puissance dynamique du c\oe{}ur & 1,24 mW\\
+Puissance statique du c\oe{}ur & 412,26 mW\\
+Puissance des E/S & 15,36 mW\\
+ALM & 75\\
+Registres & 8\\
+Blocs DSP / bits mémoire & 0 / 0\\
+Horloge déclarée & 100 MHz (période 10 ns)\\
+\bottomrule
+\end{tabular}
+\end{center}
+La somme des trois postes de puissance est bien $1{,}24+412{,}26+15{,}36=428{,}86$ mW. Le poste statique domine ce modèle du composant. Le total inclut les E/S : il ne représente pas uniquement la logique arithmétique du filtre, ni l'alimentation de toute la carte.
+
+\textbf{Activité et confiance.} Le rapport classe l'estimation \emph{Low : user provided insufficient toggle rate data}. Aucun signal ne reçoit d'activité issue de simulation. La valeur retrouvée est une estimation Quartus existante, pas une mesure instrumentale ni une caractérisation énergétique avec des images représentatives.
+
+\textbf{Limite temporelle.} Le fichier \texttt{SDC1.sdc} impose une période de 10 ns. Cependant, TimeQuest indique 72 ports d'entrée et 8 ports de sortie non contraints ; les rubriques Fmax et setup ne contiennent aucun chemin analysé (\emph{No paths to report}). Les marges de largeur minimale d'impulsion ne donnent pas le délai critique du calcul. La période demandée ne permet donc pas d'affirmer que le filtre accepte réellement un résultat valide toutes les 10 ns.
+
+Pour une campagne ultérieure à un résultat par cycle validé, l'énergie se calculerait avec $E_{\mathrm{résultat}}=P/f$ et $E_N=NP/f$. Ces expressions exigent un débit établi et une puissance correspondant à son activité ; les rapports retrouvés ne suffisent pas à établir ces deux conditions.
+
+Les sources et rapports bruts sont conservés dans le dépôt sous \path{exo2/archive_quartus_2026-09-29/}. Aucune nouvelle compilation n'a été utilisée pour remplacer les résultats archivés.
+\endgroup
 
 \newpage
 \section{Exercice 3 -- Réalisation sur DE10-Nano}
@@ -211,7 +242,7 @@ Marge hold minimale analysée & +0,113 ns\\
 \end{center}
 Les délais externes de deux entrées et trente sorties ne sont pas entièrement contraints. Les marges internes positives ne constituent donc pas une validation temporelle complète des interfaces.
 
-Le dossier conserve des bancs pour la vidéo, l'I2C et le démarrage. Le README rapporte leur réussite ; ils n'ont pas été réexécutés pour ce compte rendu. Les photographies apportent une preuve d'affichage du lapin et d'écran noir en reset. Elles ne suffisent pas, seules, à vérifier numériquement chaque pixel filtré.
+Les bancs vidéo, I2C et démarrage sont conservés ; leur réussite est rapportée dans le README, sans nouvelle exécution ici. Les photos attestent l'affichage, mais ne vérifient pas chaque pixel filtré.
 
 \newpage
 \subsection{Observation sur carte}
@@ -286,12 +317,12 @@ Le reset modifie plusieurs activités à la fois : balayage utile, mémoire, cal
 \subsection{Améliorations et travaux restant à réaliser}
 Une mesure plus solide intégrerait tension et courant pendant une même durée pour plusieurs répétitions, avec une température stabilisée et des périphériques identiques. Une variante filtre actif / filtre contourné, conservant le même balayage et le même HDMI, isolerait mieux l'effet du traitement que la comparaison avec le reset.
 
-Pour terminer la comparaison architecturale de l'énoncé, il faut compléter les variantes d'addition, de pipeline et de parallélisme, produire des activités représentatives, puis mesurer le débit valide et la puissance. L'exercice 2 demande encore le délai critique et une estimation de puissance propre à l'IP. L'ancien rapport du multiplieur constitue un point de départ, mais son faible niveau de confiance interdit une comparaison énergétique définitive.
+Pour terminer la comparaison architecturale de l'énoncé, il faut compléter les variantes d'addition, de pipeline et de parallélisme, produire des activités représentatives, puis mesurer le débit valide et la puissance. Pour l'exercice 2, l'estimation de 428,86 mW est retrouvée ; restent le délai critique avec des E/S contraintes et une estimation fondée sur une activité représentative. L'ancien rapport du multiplieur constitue un point de départ, mais son faible niveau de confiance interdit une comparaison énergétique définitive.
 
 \subsection{Conclusion}
 La chaîne réalisée stocke une image en ROM, construit un voisinage 3$\times$3, effectue un lissage RGB et génère une sortie HDMI. L'affichage sur carte est documenté. Les relevés conduisent à environ \textbf{3,149 W en fonctionnement} et \textbf{52,9 mJ par trame} au périmètre de l'alimentation, pour un débit nominal de 59,52 images/s.
 
-Ce résultat valide une première caractérisation de la plateforme. Il ne remplace pas les comparaisons d'opérateurs ni la mesure du filtre isolé demandées par les exercices précédents.
+Ce résultat valide une première caractérisation de la plateforme. Le filtre enregistré dispose aussi d'une estimation Quartus de 428,86 mW, à faible confiance. Les comparaisons d'opérateurs et la caractérisation temporelle complète restent à réaliser.
 
 \newpage
 \section*{Sources et traçabilité}
@@ -301,6 +332,7 @@ Ce résultat valide une première caractérisation de la plateforme. Il ne rempl
 \item C. Belleudy, \emph{Estimation et Optimisation de la consommation dans les architectures multicores}, support Moodle \texttt{M2\_LP\_P1\_2025.pdf}, diapositives 8--9, 18 et 20.
 \item Projet TP1\_ARCHI, dossier \texttt{github\_DE10\_Nano} : sources classées dans \texttt{exo1}, \texttt{exo2} et \texttt{exo3}, fichier \path{exo3/bitstream/build-info.txt}, photos et \path{exo3/resultat/mesures.csv}.
 \item Projet local \path{M2_TP1_Archi/TP1/output_files} : rapports \texttt{TP1.pow.rpt}, \texttt{TP1.pow.summary} et \texttt{TP1.fit.summary}, datés du 29 septembre 2026.
+\item Projet \texttt{TP1\_EXO2}, archive Quartus du 29 septembre 2026 récupérée dans le volume Docker : \texttt{TP1\_EXO2.vhd}, \texttt{SDC1.sdc}, rapports \texttt{pow}, \texttt{fit} et \texttt{sta}, conservés sous \path{exo2/archive_quartus_2026-09-29/}.
 \end{enumerate}
 
 \subsection*{Calcul reproductible à partir des relevés}

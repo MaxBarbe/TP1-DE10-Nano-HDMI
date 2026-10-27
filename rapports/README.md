@@ -2,7 +2,7 @@
 
 ## Livrables du 26 octobre 2026
 
-- [Rapport TP1 (PDF)](TP1_Archi_Rapport_2026-10-26.pdf) : 8 pages avec architecture, photographies et calculs de consommation. Les comparaisons de variantes des exercices 1 et 2 restent à compléter.
+- [Rapport TP1 (PDF)](TP1_Archi_Rapport_2026-10-26.pdf) : 9 pages, mise à jour le 27 octobre, avec architecture, photographies et calculs de consommation. Les rapports Quartus retrouvés de l’exercice 2 donnent 428,86 mW (75 ALM, 8 registres). Les variantes de l’exercice 1 et la validation temporelle complète restent à compléter.
 - [Projet LaTeX TP1](rapport_tp1/main.tex) et [archive Overleaf](TP1_Archi_Rapport_2026-10-26_Overleaf.zip).
 - [Description du governor conservative (PDF)](Description_governor_conservative_Maxime_Barbe.pdf), [source LaTeX](governor_conservative/main.tex) et [archive Overleaf](Description_governor_conservative_Maxime_Barbe_Overleaf.zip).
 
@@ -25,4 +25,8 @@ L’article étudie le DVFS sur matériel réel, notamment un Raspberry Pi 4B, e
 - Article scientifique enregistré sur Moodle, statut **Brouillon (non remis)**.
 - Description du governor enregistrée sur Moodle, statut **Brouillon (non remis)**.
 - Les deux dépôts restent volontairement en brouillon à la demande de Maxime.
-- Le rapport TP1 n’a pas été remis sur Moodle. Il reste à compléter les comparaisons manquantes des exercices 1 et 2 avant la version finale.
+- Le rapport TP1 n’a pas été remis sur Moodle. Il reste à compléter les variantes de l’exercice 1 et les contraintes temporelles/activités représentatives du filtre avant la version finale.
+
+## Résultats retrouvés le 27 octobre
+
+Les sources et rapports originaux du filtre enregistré sont conservés dans [exo2/archive_quartus_2026-09-29](../exo2/archive_quartus_2026-09-29). Power Analyzer : 428,86 mW, confiance Low, sans activité de simulation. Les 72 entrées et 8 sorties ne sont pas contraintes : le délai critique et le débit à 100 MHz ne sont pas validés. Le rapport distingue cette version de la version combinatoire du dépôt.
