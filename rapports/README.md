@@ -36,3 +36,7 @@ Les sources et rapports originaux du filtre enregistré sont conservés dans [ex
 Les IP générées existent : addition signée 32 bits avec pipeline 1, 2 et 4 ; addition flottante (exposant 8, mantisse 23, pipeline 14) ; multiplication signée 32×32 vers 64 bits avec pipeline 1, 2 et 4. Voir [les originaux archivés](../exo1/archive_ip_generees/). Les rapports chiffrés propres à chaque variante restent non retrouvés.
 
 Ancien projet Overleaf fourni par Maxime : [M2 TP1 Archi](https://www.overleaf.com/project/6ab3907904aa18e619729093). Son contenu reste à vérifier : Safari affiche une page vide pendant la consultation. Le PDF local inclut la correction sur les variantes ; cette dernière correction n’a pas encore été transférée sur Overleaf.
+
+## Résultats retrouvés le 27 octobre
+
+Les sources et rapports originaux du filtre enregistré sont conservés dans [exo2/archive_quartus_2026-09-29](../exo2/archive_quartus_2026-09-29). Power Analyzer : 428,86 mW, confiance Low, sans activité de simulation. Les 72 entrées et 8 sorties ne sont pas contraintes : le délai critique et le débit à 100 MHz ne sont pas validés. Le rapport distingue cette version de la version combinatoire du dépôt.

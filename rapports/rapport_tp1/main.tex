@@ -32,7 +32,6 @@
 \textbf{Plateforme :} Terasic DE10-Nano, Cyclone V 5CSEBA6U23I7.\\
 \textbf{Outils :} Quartus Prime Lite 17.1, Power Analyzer, description VHDL/Verilog.
 
-\small\textbf{État du compte rendu.} L'exercice 3 dispose d'un affichage observé et de quatre relevés d'alimentation. Les exercices 1 et 2 disposent aussi de rapports Quartus archivés. Les résultats comparatifs des variantes de l'exercice 1 et la validation temporelle complète du filtre restent à compléter. Aucune valeur expérimentale n'est extrapolée pour combler ces manques.
 \end{titlepage}\hypersetup{pageanchor=true}
 
 \section{Objectif et méthode}
@@ -53,71 +52,80 @@ Pour une chaîne vidéo continue de débit $r$ images/s, $E_{\mathrm{image}}\sim
 
 Le Power Analyzer estime une puissance du composant selon son modèle et l'activité fournie. Le testeur d'alimentation de l'exercice 3 inclut la carte et les pertes en aval de son point de mesure. Ces deux périmètres ne sont pas directement comparables.
 
-\subsection{Données effectivement disponibles}
-\begin{center}
-\begin{tabularx}{\linewidth}{@{}l X@{}}
-\toprule
-Partie & Éléments exploitables\\
-\midrule
-Exercice 1 & Additionneur enregistré, IP générées pour additions et multiplications pipelinées, addition flottante, testbench à 100 MHz et ancien rapport Power Analyzer du 29 septembre.\\
-Exercice 2 & Filtre combinatoire et version à sortie enregistrée ; rapports Quartus du 29 septembre retrouvés dans le volume Docker ; intégration dans l'exercice 3.\\
-Exercice 3 & Sources complètes, provenance de compilation, photos d'affichage, quatre relevés de tension/courant et CSV.\\
-\bottomrule
-\end{tabularx}
-\end{center}
-Les résultats de compilation repris ici proviennent des rapports conservés. Ils ne correspondent pas à une nouvelle campagne Quartus réalisée pour ce compte rendu.
-
 \subsection{Conditions d'une comparaison équitable}
 Il faut conserver le composant, les contraintes, les conditions électriques et thermiques, une distribution d'entrées comparable et une fenêtre d'activité documentée. Le nombre d'opérations réellement terminées doit être compté après remplissage du pipeline. Le support du TP rappelle l'importance des stimuli et de l'import d'un fichier d'activité VCD dans Power Analyzer [2, diapositives 5--11].
 
 \newpage
 \begingroup\small\section{Exercice 1 -- Opérateurs, pipeline et parallélisme}
-\subsection{Additionneur 32 bits}
-Le fichier \texttt{add32.v} réalise une addition non signée sur 32 bits avec sortie enregistrée :
-\begin{lstlisting}[language=Verilog]
-always @(posedge clk)
-    R1 <= A + B;
-\end{lstlisting}
-Le résultat est ramené à 32 bits : la retenue finale est perdue. Ainsi, \texttt{FFFFFFFF + 1} produit zéro modulo $2^{32}$. Le testbench prévoit une période de 10 ns, soit 100 MHz, et quelques cas simples. Il s'agit de stimuli fonctionnels courts, insuffisants pour représenter seuls une activité arithmétique générale.
+\subsection{Conditions d'analyse}
+Les opérateurs sont implantés sur le Cyclone V 5CSEBA6U23I7 avec Quartus Prime Lite 17.1. La consommation est estimée avec Power Analyzer en mode \emph{Vectorless}. L'indice de confiance \emph{Low} reflète l'absence d'activité de simulation représentative. Les valeurs de puissance sont donc des estimations du composant et ne constituent pas des mesures sur carte.
 
-\subsection{Comparaisons demandées et interprétation}
-Le pipeline raccourcit le chemin combinatoire, mais ajoute des registres. Pour $q$ voies, une fréquence $f$ et un intervalle d'initiation $II$, le débit théorique vaut $qf/II$ ; une latence de $L$ cycles vaut $L/f$. L'énergie par résultat dépend du débit réellement atteint et de l'activité.
-
+\subsection{Addition entière signée 32 bits}
+L'IP \texttt{LPM\_ADD\_SUB} réalise une addition signée sur 32 bits. Trois configurations sont étudiées : pipeline 1, 2 et 4.
 \begin{center}
-\footnotesize
-\begin{tabularx}{\linewidth}{@{}l X@{}}
+\begin{tabular}{@{}rrrrrr@{}}
 \toprule
-Comparaison demandée & État des données disponibles\\
+Pipeline & $f$ (MHz) & $P_{tot}$ (mW) & $P_{dyn,core}$ & $P_{stat,core}$ & E/S$^*$\\
 \midrule
-Addition entière, latence 1 & Source, testbench et IP pipeline 1 retrouvés ; puissance associée non retrouvée.\\
-Addition entière, pipeline 2 et 4 & IP générées pipeline 2 et 4 retrouvées ; résultats chiffrés associés non retrouvés.\\
-Addition flottante & IP retrouvée : exposant 8 bits, mantisse 23 bits, pipeline 14 ; rapport associé non retrouvé.\\
-Voies parallèles & Comparaison chiffrée non disponible.\\
-Multiplication DSP / éléments logiques & IP pipeline 1, 2 et 4 retrouvées ; un seul résultat DSP ancien conservé, sans comparaison logique validée.\\
-\bottomrule
-\end{tabularx}
-\end{center}
-
-\textbf{Correction après examen du cache Quartus.} Le dossier original \path{M2_TP1_Archi/TP1/db} contient les IP générées \texttt{add\_sub\_0ng/1ng/2ng.tdf} (addition signée 32 bits, pipeline 1/2/4), \texttt{altfp\_add\_sub\_8ri.tdf} (flottant, pipeline 14) et \texttt{mult\_njo/ojo/qjo.v} (multiplication signée 32$\times$32 vers 64 bits, pipeline 1/2/4). Ces fichiers prouvent les configurations générées, mais ne donnent pas les consommations finales de chaque variante. Ils sont préservés sous \path{exo1/archive_ip_generees/}.
-
-\subsection{Résultat ancien du multiplieur}
-Le projet conservé utilise un \texttt{LPM\_MULT} signé, entrées 32 bits et produit 64 bits. Le schéma porte un paramètre de pipeline de 1 ; cependant, le rapport Fitter correspondant indique zéro registre final. Il faut donc vérifier la réalisation obtenue avant d'affirmer la latence effective de cette compilation.
-
-\begin{center}
-\begin{tabular}{@{}lr@{}}
-\toprule
-Power Analyzer -- 29 septembre 2026 & Valeur\\
-\midrule
-Puissance thermique totale estimée & 532,58 mW\\
-Puissance dynamique du c\oe{}ur & 8,23 mW\\
-Puissance statique du c\oe{}ur & 413,13 mW\\
-Puissance des E/S & 111,22 mW\\
-Ressources Fitter & 24 ALM, 3 DSP\\
-Horloge annoncée dans le rapport & 100 MHz\\
+1 & 100,00 & 441,43 & 1,15 & 412,36 & 27,92\\
+2 & 337,27 & 490,76 & 5,52 & 412,77 & 72,47\\
+4 & 210,70 & 476,23 & 3,91 & 412,65 & 59,67\\
 \bottomrule
 \end{tabular}
 \end{center}
-\textbf{Limite :} Quartus classe la confiance \emph{Low} et n'utilise aucune activité issue de simulation. La fréquence annoncée ne prouve pas un débit utile d'une multiplication par cycle. On ne déduit donc pas d'énergie par opération fiable de ce seul rapport, ni de conclusion DSP contre logique.
+$^*$E/S en mW, calculées par différence $P_{tot}-P_{dyn,core}-P_{stat,core}$ ;  La fréquence de 100 MHz est une fréquence d'étude : TimeQuest n'y donnait pas de Fmax exploitable. TimeQuest donne respectivement 337,27 et 210,70 MHz pour les pipelines 2 et 4.
+
+\subsection{Énergie par opération : calcul sous hypothèse de débit}
+Pour un résultat valide par cycle en régime établi, $E_{op}=P/f$. Une fenêtre de 1000 opérations est considérée pour négliger le remplissage initial. Les énergies suivantes sont calculées sous cette hypothèse de débit :
+\begin{center}
+\begin{tabular}{@{}rrrr@{}}
+\toprule
+Pipeline & $E_{tot}$ (nJ/op) & $E_{dyn,core}$ (pJ/op) & $L/f$ nominal (ns)\\
+\midrule
+1 & 4,414 & 11,50 & 10,00\\
+2 & 1,455 & 16,37 & 5,93\\
+4 & 2,260 & 18,56 & 18,98\\
+\bottomrule
+\end{tabular}
+\end{center}
+Les latences $L/f$ supposent que la profondeur demandée est effectivement réalisée. Parmi ces points estimés, le pipeline 2 minimise l'énergie totale normalisée. Le pipeline 4 n'atteint pas une fréquence supérieure au pipeline 2 : la profondeur seule ne garantit pas une progression de Fmax après placement-routage. Les fréquences différentes empêchent d'attribuer toute variation de puissance au seul pipeline.
+
+\newpage
+\subsection{Addition flottante 32 bits}
+L'IP \texttt{ALTFP\_ADD\_SUB} utilise un exposant de 8 bits, une mantisse de 23 bits, un pipeline de 14 et l'arrondi \emph{To Nearest}. La fréquence maximale retenue est 183,82 MHz. Deux fréquences sont comparées :
+\begin{center}
+\begin{tabular}{@{}rrrrr@{}}
+\toprule
+$f$ (MHz) & $P_{tot}$ (mW) & $P_{dyn,core}$ (mW) & $E_{tot}$ (nJ/op) & $E_{dyn,core}$ (pJ/op)\\
+\midrule
+100,00 & 448,09 & 8,97 & 4,481 & 89,70\\
+183,82 & 467,32 & 16,48 & 2,542 & 89,65\\
+\bottomrule
+\end{tabular}
+\end{center}
+À 183,82 MHz, la puissance statique du c\oe{}ur est 412,61 mW ; le poste E/S déduit vaut 38,23 mW. La fréquence est multipliée par 1,8382 et la puissance dynamique par environ 1,8372. Cette évolution est compatible avec $P_{dyn}\simeq\alpha CV^2f$ à activité et tension comparables. L'énergie dynamique normalisée reste presque constante, tandis que le coût statique par opération baisse si le débit augmente.
+
+L'énergie dynamique flottante, environ 89,65 pJ/op, dépasse les 11,50 à 18,56 pJ/op des additions entières étudiées. Le traitement des exposants, l'alignement, la normalisation et l'arrondi ajoutent de la logique. Cette comparaison reste liée aux architectures et au modèle d'activité retenus.
+
+\subsection{Multiplication signée 32$\times$32 vers 64 bits}
+Les trois variantes \texttt{LPM\_MULT} utilisent trois DSP. Les ressources et puissances obtenues sont :
+\begin{center}
+\begin{tabular}{@{}rrrrrrrr@{}}
+\toprule
+Pipeline & ALM & Reg. & DSP & $P_{tot}$ & $P_{dyn,core}$ & $P_{stat,core}$ & E/S\\
+\midrule
+1 & 24 & 0 & 3 & 532,58 & 8,23 & 413,13 & 111,22\\
+2 & 24 & 0 & 3 & 530,84 & 6,50 & 413,11 & 111,22\\
+4 & 46 & 161 & 3 & 532,81 & 8,72 & 413,13 & 110,96\\
+\bottomrule
+\end{tabular}
+\end{center}
+Toutes les puissances sont en mW. Les trois postes se somment au total annoncé pour chaque ligne. Le pipeline 4 ajoute des ressources, tandis que le pipeline 2 a la puissance dynamique estimée la plus faible. Les fréquences des variantes 2 et 4 ne sont pas indiquées dans cette analyse : on n'en déduit pas un classement énergétique par opération.
+
+Le rapport du pipeline 1 indique 100 MHz, mais zéro registre au Fitter malgré le paramètre pipeline 1. Le pipeline 2 comporte également zéro registre au Fitter : les latences effectives restent à vérifier. Le seul paramètre de l'IP ne prouve donc pas la profondeur du circuit final.
+
+\subsection{Limites et compléments nécessaires}
+Les estimations Vectorless doivent être complétées par une activité représentative pour renforcer la comparaison. Cette méthode ne garantit pas à elle seule des activités équivalentes. L'étude ne comprend pas de comparaison chiffrée à plusieurs voies ni de multiplication effectivement réalisée sans DSP.
 
 \newpage
 \endgroup\begingroup\small\section{Exercice 2 -- Architecture du filtre vidéo}
@@ -158,16 +166,16 @@ La chaîne intégrée traite jusqu'à un pixel par cycle de l'horloge vidéo dan
 
 Le temps nécessaire pour disposer du premier voisinage comprend au moins deux lignes et deux colonnes. Dans la trame utilisée, les lignes comportent 800 périodes, y compris les zones de suppression vidéo ; la construction du voisinage s'étale donc sur le calendrier vidéo, pas seulement sur les 420 pixels utiles d'une ligne.
 
-La puissance archivée ci-dessous concerne une autre version, à sortie enregistrée. La mesure de la section suivante concerne toute la plateforme. Une comparaison énergétique selon le débit exige encore une activité représentative et des contraintes temporelles complètes.
+La puissance estimée ci-dessous concerne une autre version, à sortie enregistrée. La mesure de la section suivante concerne toute la plateforme. Une comparaison énergétique selon le débit exige encore une activité représentative et des contraintes temporelles complètes.
 
 \newpage
-\subsection{Résultats Quartus retrouvés : sortie enregistrée}
-Le projet \texttt{TP1\_EXO2}, conservé dans un ancien volume Docker Quartus, a été retrouvé le 27 octobre. Ses rapports datent du \textbf{29 septembre 2026}. Le fichier \texttt{TP1\_EXO2.vhd} calcule la même somme pondérée, puis enregistre \texttt{somme/10} sur le front montant de \texttt{clk}. Il traite une composante 8 bits ; les neuf entrées totalisent 72 bits. Cette réalisation possède donc une sortie enregistrée, contrairement au fichier combinatoire du dépôt.
+\subsection{Synthèse et consommation du filtre à sortie enregistrée}
+Le filtre est synthétisé dans le projet \texttt{TP1\_EXO2}. Le fichier \texttt{TP1\_EXO2.vhd} calcule la même somme pondérée, puis enregistre \texttt{somme/10} sur le front montant de \texttt{clk}. Il traite une composante 8 bits ; les neuf entrées totalisent 72 bits. Cette réalisation possède donc une sortie enregistrée, contrairement au fichier combinatoire du dépôt.
 
 \begin{center}
 \begin{tabular}{@{}lr@{}}
 \toprule
-Power Analyzer / Fitter archivés & Valeur\\
+Power Analyzer / Fitter & Valeur\\
 \midrule
 Puissance thermique totale estimée & \textbf{428,86 mW}\\
 Puissance dynamique du c\oe{}ur & 1,24 mW\\
@@ -182,13 +190,12 @@ Horloge déclarée & 100 MHz (période 10 ns)\\
 \end{center}
 La somme des trois postes de puissance est bien $1{,}24+412{,}26+15{,}36=428{,}86$ mW. Le poste statique domine ce modèle du composant. Le total inclut les E/S : il ne représente pas uniquement la logique arithmétique du filtre, ni l'alimentation de toute la carte.
 
-\textbf{Activité et confiance.} Le rapport classe l'estimation \emph{Low : user provided insufficient toggle rate data}. Aucun signal ne reçoit d'activité issue de simulation. La valeur retrouvée est une estimation Quartus existante, pas une mesure instrumentale ni une caractérisation énergétique avec des images représentatives.
+\textbf{Activité et confiance.} Le rapport classe l'estimation \emph{Low : user provided insufficient toggle rate data}. Aucun signal ne reçoit d'activité issue de simulation. Cette estimation doit être interprétée avec les limites du modèle d'activité Vectorless.
 
 \textbf{Limite temporelle.} Le fichier \texttt{SDC1.sdc} impose une période de 10 ns. Cependant, TimeQuest indique 72 ports d'entrée et 8 ports de sortie non contraints ; les rubriques Fmax et setup ne contiennent aucun chemin analysé (\emph{No paths to report}). Les marges de largeur minimale d'impulsion ne donnent pas le délai critique du calcul. La période demandée ne permet donc pas d'affirmer que le filtre accepte réellement un résultat valide toutes les 10 ns.
 
 Pour une campagne ultérieure à un résultat par cycle validé, l'énergie se calculerait avec $E_{\mathrm{résultat}}=P/f$ et $E_N=NP/f$. Ces expressions exigent un débit établi et une puissance correspondant à son activité ; les rapports retrouvés ne suffisent pas à établir ces deux conditions.
 
-Les sources et rapports bruts sont conservés dans le dépôt sous \path{exo2/archive_quartus_2026-09-29/}. Aucune nouvelle compilation n'a été utilisée pour remplacer les résultats archivés.
 \endgroup
 
 \newpage
@@ -220,12 +227,12 @@ L'horloge de 50 MHz est divisée par deux dans le code, donnant une horloge pixe
 \]
 Ce débit vient du code et de l'horloge nominale. Il n'a pas été mesuré par un instrument. Les coordonnées et les synchronisations sont retardées pour accompagner les deux étages du chemin de données.
 
-\subsection{Compilation et validation disponibles}
+\subsection{Compilation et validation}
 Le fichier de provenance du bitstream mentionne une compilation Quartus Lite 17.1 du 19 octobre 2026, sans erreur et avec huit avertissements :
 \begin{center}
 \begin{tabular}{@{}lr@{}}
 \toprule
-Ressource ou marge contrainte & Résultat archivé\\
+Ressource ou marge contrainte & Résultat\\
 \midrule
 ALM & 543 / 41\,910\\
 Blocs RAM & 351 / 553\\
@@ -313,12 +320,12 @@ Le reset modifie plusieurs activités à la fois : balayage utile, mémoire, cal
 \subsection{Améliorations et travaux restant à réaliser}
 Une mesure plus solide intégrerait tension et courant pendant une même durée pour plusieurs répétitions, avec une température stabilisée et des périphériques identiques. Une variante filtre actif / filtre contourné, conservant le même balayage et le même HDMI, isolerait mieux l'effet du traitement que la comparaison avec le reset.
 
-Pour terminer la comparaison architecturale de l'énoncé, il faut retrouver ou refaire les résultats chiffrés des IP d'addition et de multiplication retrouvées, compléter le parallélisme et produire des activités représentatives, puis mesurer le débit valide et la puissance. Pour l'exercice 2, l'estimation de 428,86 mW est retrouvée ; restent le délai critique avec des E/S contraintes et une estimation fondée sur une activité représentative. L'ancien rapport du multiplieur constitue un point de départ, mais son faible niveau de confiance interdit une comparaison énergétique définitive.
+Pour terminer la comparaison architecturale de l'énoncé, il faut compléter le parallélisme et utiliser des activités représentatives, puis mesurer le débit valide et la puissance. Pour l'exercice 2, l'estimation est de 428,86 mW ; restent le délai critique avec des E/S contraintes et une estimation fondée sur une activité représentative. L'analyse du multiplieur constitue un point de comparaison, mais son faible niveau de confiance interdit une comparaison énergétique définitive.
 
 \subsection{Conclusion}
 La chaîne réalisée stocke une image en ROM, construit un voisinage 3$\times$3, effectue un lissage RGB et génère une sortie HDMI. L'affichage sur carte est documenté. Les relevés conduisent à environ \textbf{3,149 W en fonctionnement} et \textbf{52,9 mJ par trame} au périmètre de l'alimentation, pour un débit nominal de 59,52 images/s.
 
-Ce résultat valide une première caractérisation de la plateforme. Le filtre enregistré dispose aussi d'une estimation Quartus de 428,86 mW, à faible confiance. Les comparaisons d'opérateurs et la caractérisation temporelle complète restent à réaliser.
+Ce résultat valide une première caractérisation de la plateforme. Le filtre enregistré dispose aussi d'une estimation Quartus de 428,86 mW, à faible confiance. L'étude des opérateurs montre l'intérêt du pipeline 2 pour l'énergie totale normalisée de l'addition entière. Le parallélisme et la validation temporelle complète du filtre permettraient de prolonger cette comparaison.
 
 \newpage
 \section*{Sources et traçabilité}
@@ -329,6 +336,7 @@ Ce résultat valide une première caractérisation de la plateforme. Le filtre e
 \item Projet TP1\_ARCHI, dossier \texttt{github\_DE10\_Nano} : sources classées dans \texttt{exo1}, \texttt{exo2} et \texttt{exo3}, fichier \path{exo3/bitstream/build-info.txt}, photos et \path{exo3/resultat/mesures.csv}.
 \item Projet local \path{M2_TP1_Archi/TP1/output_files} : rapports \texttt{TP1.pow.rpt}, \texttt{TP1.pow.summary} et \texttt{TP1.fit.summary}, datés du 29 septembre 2026.
 \item Projet \texttt{TP1\_EXO2}, archive Quartus du 29 septembre 2026 récupérée dans le volume Docker : \texttt{TP1\_EXO2.vhd}, \texttt{SDC1.sdc}, rapports \texttt{pow}, \texttt{fit} et \texttt{sta}, conservés sous \path{exo2/archive_quartus_2026-09-29/}.
+\item Ancien projet Overleaf \emph{M2 TP1 Archi}, \href{https://www.overleaf.com/project/6ab3907904aa18e619729093}{lien du projet original} : contenu de \texttt{main.tex} fourni par Maxime le 27 octobre, archivé sous \path{rapports/sources/main_overleaf_original.tex}. Les figures et le fichier \texttt{preamble.tex} de ce projet n'ont pas été fournis.
 \end{enumerate}
 
 \subsection*{Calcul reproductible à partir des relevés}
